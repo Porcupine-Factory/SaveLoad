@@ -1,0 +1,18 @@
+{
+    "Amazon": {
+        "AssetProcessor": {
+            "Settings": {
+                "ScanFolder SaveLoad/Assets": {
+                    "watch": "@GEMROOT:SaveLoad@/Assets",
+                    "recursive": 1,
+                    "order": 101
+                },
+                "ScanFolder SaveLoad/Registry": {
+                    "watch": "@GEMROOT:SaveLoad@/Registry",
+                    "recursive": 1,
+                    "order": 102
+                }
+            }
+        }
+    }
+}
