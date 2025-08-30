@@ -1,14 +1,15 @@
 #pragma once
+#include <SaveLoad/SaveLoadComponentBus.h>
 
 #include <SaveLoad/SaveLoadTypeIds.h>
 #include <AzCore/Component/Component.h>
 #include <AzCore/Serialization/EditContext.h>
-#include <SaveData/SaveDataRequestBus.h>
 
 namespace SaveLoad
 {
     class SaveLoadComponent
         : public AZ::Component
+        , public SaveLoadComponentRequestBus::Handler
     {
     public:
         //AZ_RTTI(SaveLoadComponent, SaveLoadComponentTypeId);
@@ -22,10 +23,22 @@ namespace SaveLoad
         void Activate() override;
         void Deactivate() override;
 
-        void SaveBufferToPersistentStorage();
-        void LoadBufferFromPersistentStorage();
-        void SaveObjectToPersistentStorage();
-        void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId);
+        static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
+        static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided);
+        static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
+
+        // SaveLoadComponentRequestBus
+        void SaveBufferToPersistentStorage() override;
+        void LoadBufferFromPersistentStorage() override;
+        void SaveObjectToPersistentStorage() override;
+        void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
+
+    private:
+        // SaveLoadNotificationBus
+        void OnSavedBuffer();
+        void OnLoadedBuffer();
+        void OnSavedObject();
+        void OnLoadedObject();
 
         AZStd::string testString;
         float testFloat = 0.0f;

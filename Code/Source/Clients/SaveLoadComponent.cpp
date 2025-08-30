@@ -18,6 +18,7 @@ namespace SaveLoad
                 ->Field("testInt", &SaveLoadComponent::testInt)
                 ->Field("testBool", &SaveLoadComponent::testBool)
             ;
+
             if(AZ::EditContext* ec = sc->GetEditContext())
             {
                 using namespace AZ::Edit::Attributes;
@@ -44,6 +45,21 @@ namespace SaveLoad
                         "testBool", "testBool type");
             }
         }
+
+        if(auto bc = azrtti_cast<AZ::BehaviorContext*>(rc))
+        {
+            bc->EBus<SaveLoadNotificationBus>("SaveLoadNotificationBus")
+                ->Handler<SaveLoadNotificationHandler>();
+
+            bc->EBus<SaveLoadComponentRequestBus>("SaveLoadComponentRequestBus")
+                ->Attribute(AZ::Script::Attributes::Scope, AZ::Script::Attributes::ScopeFlags::Common)
+                ->Attribute(AZ::Script::Attributes::Module, "save")
+                ->Attribute(AZ::Script::Attributes::Category, "Save Load")
+                ->Event("Save Buffer To Persistent Storage", &SaveLoadComponentRequests::SaveBufferToPersistentStorage)
+                ->Event("Load Buffer From Persistent Storage", &SaveLoadComponentRequests::LoadBufferFromPersistentStorage)
+                ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
+                ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage);
+        }
     }
 
     void SaveLoadComponent::Reflect(AZ::SerializeContext& sc)
@@ -59,15 +75,32 @@ namespace SaveLoad
 
     void SaveLoadComponent::Activate()
     {
-        AZ_Printf("", "SaveLoadComponent Activated.");
-        SaveBufferToPersistentStorage();
-        SaveObjectToPersistentStorage();
+        // Connect the handler to the request bus
+        SaveLoadComponentRequestBus::Handler::BusConnect(GetEntityId());
     }
 
     void SaveLoadComponent::Deactivate()
     {
-        return;
+        // Disconnect the handler from the request bus
+        SaveLoadComponentRequestBus::Handler::BusDisconnect();
     }
+
+    void SaveLoadComponent::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
+    {
+    }
+
+    void SaveLoadComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
+    {
+        provided.push_back(AZ_CRC_CE("SaveLoadService"));
+    }
+
+    void SaveLoadComponent::GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible)
+    {
+        incompatible.push_back(AZ_CRC_CE("SaveLoadService"));
+    }
+
+    // Event Notification methods for use in scripts
+    void SaveLoadComponent::OnSavedBuffer(){}
 
     void SaveLoadComponent::SaveBufferToPersistentStorage()
     {
@@ -80,6 +113,7 @@ namespace SaveLoad
             if (onSavedParams.result != SaveData::SaveDataNotifications::Result::Success)
             {
                 // Error handling
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnSavedBuffer);
             }
         };
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::SaveDataBuffer, params);
@@ -96,6 +130,7 @@ namespace SaveLoad
                 // SaveDataNotifications::DataBuffer is a shared_ptr, so you can choose to either preserve the
                 // buffer (by keeping a reference to it), or just let it go out of scope so it will be deleted.
                             SaveDataNotifications::DataBuffer loadedDataBuffer = onLoadedParams.dataBuffer;
+                            SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedBuffer);
                 // Use the loaded data buffer...
             }
             else
@@ -126,6 +161,7 @@ namespace SaveLoad
             if (callbackResult != SaveData::SaveDataNotifications::Result::Success)
             {
                 // Error handling
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnSavedObject);
             }
         };
         SaveData::SaveDataRequests::SaveObject(params);
@@ -152,6 +188,7 @@ namespace SaveLoad
             {
                 // Use the loaded data buffer...
                 AZ_UNUSED(callbackParams.serializableObject);
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedObject);
             }
             else
             {

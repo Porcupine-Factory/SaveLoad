@@ -10,6 +10,9 @@ namespace SaveLoad
     // Component TypeId from SaveLoadComponent.h
     inline constexpr const char* SaveLoadComponentTypeId = "{21481543-E318-4CAC-8ECD-46E40280EDF6}";
 
+    // EBus-related IDs from SaveLoadComponentBus.h
+    inline constexpr const char* SaveLoadNotificationHandlerTypeId = "{21BEA9D9-85A6-47FE-8A92-24C094D443EA}";
+
     // Module derived classes TypeIds
     inline constexpr const char* SaveLoadModuleInterfaceTypeId = "{F57F610A-D9CB-4D28-A9AA-BF409A668133}";
     inline constexpr const char* SaveLoadModuleTypeId = "{2A211EEA-3256-4B8D-BF20-31313C34F33F}";
