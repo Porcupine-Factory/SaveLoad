@@ -121,6 +121,9 @@ namespace SaveLoad
 
     // Event Notification methods for use in scripts
     void SaveLoadComponent::OnSavedBuffer(){}
+    void SaveLoadComponent::OnLoadedBuffer(){}
+    void SaveLoadComponent::OnSavedObject(){}
+    void SaveLoadComponent::OnLoadedObject(){}
 
     void SaveLoadComponent::SaveBufferToPersistentStorage()
     {
