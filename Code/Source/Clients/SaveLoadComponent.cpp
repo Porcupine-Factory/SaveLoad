@@ -61,7 +61,9 @@ namespace SaveLoad
                 ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
                 ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage)
                 ->Event("Get In Editor", &SaveLoadComponentRequests::GetInEditor)
-                ->Event("Set In Editor", &SaveLoadComponentRequests::SetInEditor);
+                ->Event("Set In Editor", &SaveLoadComponentRequests::SetInEditor)
+                ->Event("Get Test Bool", &SaveLoadComponentRequests::GetTestBool)
+                ->Event("Set Test Bool", &SaveLoadComponentRequests::SetTestBool);
         }
     }
 
@@ -142,6 +144,9 @@ namespace SaveLoad
             if (onSavedParams.result != SaveData::SaveDataNotifications::Result::Success)
             {
                 // Error handling
+            }
+            else
+            {
                 SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnSavedBuffer);
             }
         };
@@ -190,6 +195,7 @@ namespace SaveLoad
 
         // Create a test object instance to save.
         AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>();
+        saveLoadComponent->SetTestBool(GetTestBool());
 
         // Setup the save data params
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
@@ -202,6 +208,9 @@ namespace SaveLoad
             if (callbackResult != SaveData::SaveDataNotifications::Result::Success)
             {
                 // Error handling
+            }
+            else
+            {
                 SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnSavedObject);
             }
         };
@@ -253,5 +262,15 @@ namespace SaveLoad
     void SaveLoadComponent::SetInEditor(const bool& new_inEditor)
     {
         m_inEditor = new_inEditor;
+    }
+
+    bool SaveLoadComponent::GetTestBool() const
+    {
+        return testBool;
+    }
+
+    void SaveLoadComponent::SetTestBool(const bool& new_testBool)
+    {
+        testBool = new_testBool;
     }
 } // namespace SaveLoad

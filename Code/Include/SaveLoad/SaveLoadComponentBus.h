@@ -18,6 +18,8 @@ namespace SaveLoad
         virtual void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId&) = 0;
         virtual bool GetInEditor() const = 0;
         virtual void SetInEditor(const bool&) = 0;
+        virtual bool GetTestBool() const = 0;
+        virtual void SetTestBool(const bool&) = 0;
     };
 
     using SaveLoadComponentRequestBus = AZ::EBus<SaveLoadComponentRequests>;
