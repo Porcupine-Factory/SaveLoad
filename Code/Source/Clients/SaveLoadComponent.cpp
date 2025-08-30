@@ -189,13 +189,12 @@ namespace SaveLoad
             return;
         }
 
-        // Reflect the test object class (if not already done).
+        // Reflect the Save Load Component class (if not already done).
         AZ::SerializeContext serializeContext;
         SaveLoadComponent::Reflect(serializeContext);
 
-        // Create a test object instance to save.
-        AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>();
-        saveLoadComponent->SetTestBool(GetTestBool());
+        // Use *this instance of Save Load Component to save.
+        AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>(*this);
 
         // Setup the save data params
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
@@ -225,11 +224,11 @@ namespace SaveLoad
             return;
         }
 
-        // Reflect the test object class (if not already done).
+        // Reflect the Save Load Component class (if not already done).
         AZ::SerializeContext serializeContext;
         SaveLoadComponent::Reflect(serializeContext);
 
-        // Create a test object to load.
+        // Create a Save Load Component to load.
         AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>();
 
         // Setup the load data params
