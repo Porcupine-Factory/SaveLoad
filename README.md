@@ -15,8 +15,8 @@ Whenever you perform a save of either buffer data or object parameters, you will
 
 **Linux:**
 
-* `/.local/share/<project-name>.GameLauncher/SaveData/<buffer-data-file-name>.savedata` (this is a plain text file)
-* `/.local/share/<project-name>.GameLauncher/SaveData/<object-parameters-file-name>.savedata` (this is a binary file)
+* `~/.local/share/<project-name>.GameLauncher/SaveData/<buffer-data-file-name>.savedata` (this is a plain text file)
+* `~/.local/share/<project-name>.GameLauncher/SaveData/<object-parameters-file-name>.savedata` (this is a binary file)
 
 **Windows:**
 
