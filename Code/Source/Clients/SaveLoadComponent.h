@@ -32,6 +32,7 @@ namespace SaveLoad
         void LoadBufferFromPersistentStorage() override;
         void SaveObjectToPersistentStorage() override;
         void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
+        bool InEditor() const override;
 
     private:
         // SaveLoadNotificationBus

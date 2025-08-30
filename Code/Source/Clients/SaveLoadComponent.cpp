@@ -2,6 +2,7 @@
 
 #include <SaveData/SaveDataNotificationBus.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
+#include <AzCore/Component/ComponentApplicationBus.h>
 
 namespace SaveLoad
 {
@@ -58,7 +59,8 @@ namespace SaveLoad
                 ->Event("Save Buffer To Persistent Storage", &SaveLoadComponentRequests::SaveBufferToPersistentStorage)
                 ->Event("Load Buffer From Persistent Storage", &SaveLoadComponentRequests::LoadBufferFromPersistentStorage)
                 ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
-                ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage);
+                ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage)
+                ->Event("In Editor", &SaveLoadComponentRequests::InEditor);
         }
     }
 
@@ -104,6 +106,12 @@ namespace SaveLoad
 
     void SaveLoadComponent::SaveBufferToPersistentStorage()
     {
+        if (InEditor())
+        {
+            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            return;
+        }
+
         SaveData::SaveDataRequests::SaveDataBufferParams params;
         params.dataBuffer.reset(testSaveData);
         params.dataBufferSize = testSaveDataSize;
@@ -121,6 +129,12 @@ namespace SaveLoad
 
     void SaveLoadComponent::LoadBufferFromPersistentStorage()
     {
+        if (InEditor())
+        {
+            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            return;
+        }
+
         SaveData::SaveDataRequests::LoadDataBufferParams params;
         params.dataBufferName = testSaveDataName;
         params.callback = [](const SaveData::SaveDataNotifications::DataBufferLoadedParams& onLoadedParams)
@@ -143,6 +157,12 @@ namespace SaveLoad
 
     void SaveLoadComponent::SaveObjectToPersistentStorage()
     {
+        if (InEditor())
+        {
+            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            return;
+        }
+
         // Reflect the test object class (if not already done).
         AZ::SerializeContext serializeContext;
         SaveLoadComponent::Reflect(serializeContext);
@@ -169,6 +189,12 @@ namespace SaveLoad
 
     void SaveLoadComponent::LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
     {
+        if (InEditor())
+        {
+            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            return;
+        }
+
         // Reflect the test object class (if not already done).
         AZ::SerializeContext serializeContext;
         SaveLoadComponent::Reflect(serializeContext);
@@ -196,5 +222,24 @@ namespace SaveLoad
             }
         };
         SaveData::SaveDataRequests::LoadObject(params);
+    }
+
+    bool SaveLoadComponent::InEditor() const
+    {
+        AZ::ApplicationTypeQuery applicationType;
+        if (auto componentApplicationRequests = AZ::Interface<AZ::ComponentApplicationRequests>::Get();
+            componentApplicationRequests != nullptr)
+        {
+            componentApplicationRequests->QueryApplicationType(applicationType);
+        }
+
+        if (applicationType.IsEditor())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 } // namespace SaveLoad
