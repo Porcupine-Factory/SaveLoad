@@ -60,7 +60,8 @@ namespace SaveLoad
                 ->Event("Load Buffer From Persistent Storage", &SaveLoadComponentRequests::LoadBufferFromPersistentStorage)
                 ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
                 ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage)
-                ->Event("In Editor", &SaveLoadComponentRequests::InEditor);
+                ->Event("Get In Editor", &SaveLoadComponentRequests::GetInEditor)
+                ->Event("Set In Editor", &SaveLoadComponentRequests::SetInEditor);
         }
     }
 
@@ -77,6 +78,23 @@ namespace SaveLoad
 
     void SaveLoadComponent::Activate()
     {
+        // Check whether the game is being ran in the O3DE editor
+        AZ::ApplicationTypeQuery applicationType;
+        if (auto componentApplicationRequests = AZ::Interface<AZ::ComponentApplicationRequests>::Get();
+            componentApplicationRequests != nullptr)
+        {
+            componentApplicationRequests->QueryApplicationType(applicationType);
+        }
+
+        if (applicationType.IsEditor())
+        {
+            m_inEditor = true;
+        }
+        else
+        {
+            m_inEditor = false;
+        }
+
         // Connect the handler to the request bus
         SaveLoadComponentRequestBus::Handler::BusConnect(GetEntityId());
     }
@@ -106,9 +124,9 @@ namespace SaveLoad
 
     void SaveLoadComponent::SaveBufferToPersistentStorage()
     {
-        if (InEditor())
+        if (m_inEditor)
         {
-            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -129,9 +147,9 @@ namespace SaveLoad
 
     void SaveLoadComponent::LoadBufferFromPersistentStorage()
     {
-        if (InEditor())
+        if (m_inEditor)
         {
-            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -157,9 +175,9 @@ namespace SaveLoad
 
     void SaveLoadComponent::SaveObjectToPersistentStorage()
     {
-        if (InEditor())
+        if (m_inEditor)
         {
-            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -189,9 +207,9 @@ namespace SaveLoad
 
     void SaveLoadComponent::LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
     {
-        if (InEditor())
+        if (m_inEditor)
         {
-            AZ_Warning("SaveLoad", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -224,22 +242,13 @@ namespace SaveLoad
         SaveData::SaveDataRequests::LoadObject(params);
     }
 
-    bool SaveLoadComponent::InEditor() const
+    bool SaveLoadComponent::GetInEditor() const
     {
-        AZ::ApplicationTypeQuery applicationType;
-        if (auto componentApplicationRequests = AZ::Interface<AZ::ComponentApplicationRequests>::Get();
-            componentApplicationRequests != nullptr)
-        {
-            componentApplicationRequests->QueryApplicationType(applicationType);
-        }
+        return m_inEditor;
+    }
 
-        if (applicationType.IsEditor())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    void SaveLoadComponent::SetInEditor(const bool& new_inEditor)
+    {
+        m_inEditor = new_inEditor;
     }
 } // namespace SaveLoad

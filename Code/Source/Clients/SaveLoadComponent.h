@@ -32,7 +32,8 @@ namespace SaveLoad
         void LoadBufferFromPersistentStorage() override;
         void SaveObjectToPersistentStorage() override;
         void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
-        bool InEditor() const override;
+        bool GetInEditor() const override;
+        void SetInEditor(const bool& new_inEditor) override;
 
     private:
         // SaveLoadNotificationBus
@@ -40,6 +41,8 @@ namespace SaveLoad
         void OnLoadedBuffer();
         void OnSavedObject();
         void OnLoadedObject();
+
+        bool m_inEditor = false;
 
         AZStd::string testString;
         float testFloat = 0.0f;
