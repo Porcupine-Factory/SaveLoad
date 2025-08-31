@@ -28,10 +28,14 @@ namespace SaveLoad
         static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
 
         // SaveLoadComponentRequestBus
-        void SaveBufferToPersistentStorage() override;
+        void SaveBufferToPersistentStorage(const AZStd::string& strBufferToSave) override;
         void LoadBufferFromPersistentStorage() override;
         void SaveObjectToPersistentStorage() override;
         void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
+        AZStd::string GetBufferSaveFilename() const override;
+        void SetBufferSaveFilename(const AZStd::string& new_bufferSaveFilename) override;
+        AZStd::string GetObjectSaveFilename() const override;
+        void SetObjectSaveFilename(const AZStd::string& new_objectSaveFilename) override;
         bool GetInEditor() const override;
         void SetInEditor(const bool& new_inEditor) override;
         bool GetTestBool() const override;
@@ -45,14 +49,12 @@ namespace SaveLoad
         void OnLoadedObject();
 
         bool m_inEditor = false;
+        AZStd::string m_bufferSaveFilename = "BufferSaveData";
+        AZStd::string m_objectSaveFilename = "ObjectSaveData";
 
-        AZStd::string testString;
-        float testFloat = 0.0f;
-        int testInt = 0;
-        bool testBool = false;
-
-        static const AZ::u64 testSaveDataSize = 9;
-        const char* testSaveDataName = "TestSaveData";
-        char testSaveData[testSaveDataSize] = {'a', 'b', 'c', '1', '2', '3', 'x', 'y', 'z'};
+        AZStd::string m_testString;
+        float m_testFloat = 0.0f;
+        int m_testInt = 0;
+        bool m_testBool = false;
     };
 } // namespace SaveLoad

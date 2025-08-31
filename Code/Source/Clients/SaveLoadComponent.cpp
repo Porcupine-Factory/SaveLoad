@@ -14,10 +14,10 @@ namespace SaveLoad
         {
             sc->Class<SaveLoadComponent, AZ::Component>()
                 ->Version(1)
-                ->Field("testString", &SaveLoadComponent::testString)
-                ->Field("testFloat", &SaveLoadComponent::testFloat)
-                ->Field("testInt", &SaveLoadComponent::testInt)
-                ->Field("testBool", &SaveLoadComponent::testBool)
+                ->Field("testString", &SaveLoadComponent::m_testString)
+                ->Field("testFloat", &SaveLoadComponent::m_testFloat)
+                ->Field("testInt", &SaveLoadComponent::m_testInt)
+                ->Field("testBool", &SaveLoadComponent::m_testBool)
             ;
 
             if(AZ::EditContext* ec = sc->GetEditContext())
@@ -32,16 +32,16 @@ namespace SaveLoad
                     ->ClassElement(AZ::Edit::ClassElements::Group, "Save Types")
                     ->Attribute(AZ::Edit::Attributes::AutoExpand, false)
                     ->DataElement(nullptr,
-                        &SaveLoadComponent::testString,
+                        &SaveLoadComponent::m_testString,
                         "testString", "testString type")
                     ->DataElement(nullptr,
-                        &SaveLoadComponent::testFloat,
+                        &SaveLoadComponent::m_testFloat,
                         "testFloat", "testFloat type")
                     ->DataElement(nullptr,
-                        &SaveLoadComponent::testInt,
+                        &SaveLoadComponent::m_testInt,
                         "testInt", "testInt type")
                     ->DataElement(nullptr,
-                        &SaveLoadComponent::testBool,
+                        &SaveLoadComponent::m_testBool,
                         "testBool", "testBool type");
             }
         }
@@ -59,6 +59,10 @@ namespace SaveLoad
                 ->Event("Load Buffer From Persistent Storage", &SaveLoadComponentRequests::LoadBufferFromPersistentStorage)
                 ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
                 ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage)
+                ->Event("Get Buffer Save Filename", &SaveLoadComponentRequests::GetBufferSaveFilename)
+                ->Event("Set Buffer Save Filename", &SaveLoadComponentRequests::SetBufferSaveFilename)
+                ->Event("Get Object Save Filename", &SaveLoadComponentRequests::GetObjectSaveFilename)
+                ->Event("Set Object Save Filename", &SaveLoadComponentRequests::SetObjectSaveFilename)
                 ->Event("Get In Editor", &SaveLoadComponentRequests::GetInEditor)
                 ->Event("Set In Editor", &SaveLoadComponentRequests::SetInEditor)
                 ->Event("Get Test Bool", &SaveLoadComponentRequests::GetTestBool)
@@ -70,10 +74,10 @@ namespace SaveLoad
     {
         sc.Class<SaveLoadComponent>()
             ->Version(1)
-            ->Field("testString", &SaveLoadComponent::testString)
-            ->Field("testFloat", &SaveLoadComponent::testFloat)
-            ->Field("testInt", &SaveLoadComponent::testInt)
-            ->Field("testBool", &SaveLoadComponent::testBool)
+            ->Field("testString", &SaveLoadComponent::m_testString)
+            ->Field("testFloat", &SaveLoadComponent::m_testFloat)
+            ->Field("testInt", &SaveLoadComponent::m_testInt)
+            ->Field("testBool", &SaveLoadComponent::m_testBool)
         ;
     }
 
@@ -126,7 +130,7 @@ namespace SaveLoad
     void SaveLoadComponent::OnSavedObject(){}
     void SaveLoadComponent::OnLoadedObject(){}
 
-    void SaveLoadComponent::SaveBufferToPersistentStorage()
+    void SaveLoadComponent::SaveBufferToPersistentStorage(const AZStd::string& strBufferToSave)
     {
         if (m_inEditor)
         {
@@ -135,9 +139,9 @@ namespace SaveLoad
         }
 
         SaveData::SaveDataRequests::SaveDataBufferParams params;
-        params.dataBuffer.reset(testSaveData);
-        params.dataBufferSize = testSaveDataSize;
-        params.dataBufferName = testSaveDataName;
+        params.dataBuffer.reset((void*)strBufferToSave.c_str());
+        params.dataBufferSize = strBufferToSave.length(); // TODO: this doesn't work with any arbitrary size, doesn't work well for long strings (e.g. 10+ characters)
+        params.dataBufferName = m_bufferSaveFilename;
         params.callback = [](const SaveData::SaveDataNotifications::DataBufferSavedParams& onSavedParams)
         {
             if (onSavedParams.result != SaveData::SaveDataNotifications::Result::Success)
@@ -161,7 +165,7 @@ namespace SaveLoad
         }
 
         SaveData::SaveDataRequests::LoadDataBufferParams params;
-        params.dataBufferName = testSaveDataName;
+        params.dataBufferName = m_bufferSaveFilename;
         params.callback = [](const SaveData::SaveDataNotifications::DataBufferLoadedParams& onLoadedParams)
         {
             if (onLoadedParams.result == SaveData::SaveDataNotifications::Result::Success)
@@ -199,7 +203,7 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
         params.serializableObject = saveLoadComponent;
         params.serializeContext = &serializeContext; // Omit to use the global AZ::SerializeContext instance
-        params.dataBufferName = "TestSaveObject";
+        params.dataBufferName = m_objectSaveFilename;
         params.callback = [](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
@@ -223,25 +227,21 @@ namespace SaveLoad
             return;
         }
 
-        // Reflect the Save Load Component class (if not already done).
-        AZ::SerializeContext serializeContext;
-        SaveLoadComponent::Reflect(serializeContext);
-
         // Use *this instance of Save Load Component to load.
         AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>(*this);
 
         // Setup the load data params
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
         params.serializableObject = saveLoadComponent;
-        params.serializeContext = &serializeContext; // Omit to use the global AZ::SerializeContext instance
-        params.dataBufferName = "TestSaveObject";
-        params.callback = [](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
+        params.dataBufferName = m_objectSaveFilename;
+        params.callback = [this](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
             if (callbackResult == SaveData::SaveDataNotifications::Result::Success)
             {
                 // Use the loaded data buffer...
                 AZ_UNUSED(callbackParams.serializableObject);
+                *this = *callbackParams.serializableObject;
                 SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedObject);
             }
             else
@@ -262,13 +262,33 @@ namespace SaveLoad
         m_inEditor = new_inEditor;
     }
 
+    AZStd::string SaveLoadComponent::GetBufferSaveFilename() const
+    {
+        return m_bufferSaveFilename;
+    }
+
+    void SaveLoadComponent::SetBufferSaveFilename(const AZStd::string& new_bufferSaveFilename)
+    {
+        m_bufferSaveFilename = new_bufferSaveFilename;
+    }
+
+    AZStd::string SaveLoadComponent::GetObjectSaveFilename() const
+    {
+        return m_objectSaveFilename;
+    }
+
+    void SaveLoadComponent::SetObjectSaveFilename(const AZStd::string& new_objectSaveFilename)
+    {
+        m_objectSaveFilename = new_objectSaveFilename;
+    }
+
     bool SaveLoadComponent::GetTestBool() const
     {
-        return testBool;
+        return m_testBool;
     }
 
     void SaveLoadComponent::SetTestBool(const bool& new_testBool)
     {
-        testBool = new_testBool;
+        m_testBool = new_testBool;
     }
 } // namespace SaveLoad
