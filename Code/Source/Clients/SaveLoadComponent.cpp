@@ -28,7 +28,6 @@ namespace SaveLoad
                     ->ClassElement(AZ::Edit::ClassElements::EditorData, "")
                     ->Attribute(AppearsInAddComponentMenu, AZ_CRC_CE("Game"))
                     ->Attribute(Category, "Save Load")
-                    ->Attribute(AZ::Edit::Attributes::HelpPageURL, "https://www.youtube.com/watch?v=O7rtXNlCNQQ")
 
                     ->ClassElement(AZ::Edit::ClassElements::Group, "Save Types")
                     ->Attribute(AZ::Edit::Attributes::AutoExpand, false)
@@ -69,7 +68,7 @@ namespace SaveLoad
 
     void SaveLoadComponent::Reflect(AZ::SerializeContext& sc)
     {
-        sc.Class<SaveLoadComponent, AZ::Component>()
+        sc.Class<SaveLoadComponent>()
             ->Version(1)
             ->Field("testString", &SaveLoadComponent::testString)
             ->Field("testFloat", &SaveLoadComponent::testFloat)
@@ -131,7 +130,7 @@ namespace SaveLoad
     {
         if (m_inEditor)
         {
-            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -157,7 +156,7 @@ namespace SaveLoad
     {
         if (m_inEditor)
         {
-            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -185,7 +184,7 @@ namespace SaveLoad
     {
         if (m_inEditor)
         {
-            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -220,7 +219,7 @@ namespace SaveLoad
     {
         if (m_inEditor)
         {
-            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load gem cannot be used in the editor, only with the *.GameLauncher.");
+            AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
         }
 
@@ -228,8 +227,8 @@ namespace SaveLoad
         AZ::SerializeContext serializeContext;
         SaveLoadComponent::Reflect(serializeContext);
 
-        // Create a Save Load Component to load.
-        AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>();
+        // Use *this instance of Save Load Component to load.
+        AZStd::shared_ptr<SaveLoadComponent> saveLoadComponent = AZStd::make_shared<SaveLoadComponent>(*this);
 
         // Setup the load data params
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
