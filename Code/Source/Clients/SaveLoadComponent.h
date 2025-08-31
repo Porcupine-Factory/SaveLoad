@@ -29,7 +29,7 @@ namespace SaveLoad
 
         // SaveLoadComponentRequestBus
         void SaveBufferToPersistentStorage(const AZStd::string& strBufferToSave) override;
-        void LoadBufferFromPersistentStorage() override;
+        AZStd::string LoadBufferFromPersistentStorage() override;
         void SaveObjectToPersistentStorage() override;
         void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
         AZStd::string GetBufferSaveFilename() const override;
@@ -51,6 +51,8 @@ namespace SaveLoad
         bool m_inEditor = false;
         AZStd::string m_bufferSaveFilename = "BufferSaveData";
         AZStd::string m_objectSaveFilename = "ObjectSaveData";
+
+        AZStd::string m_loadedBuffer;
 
         AZStd::string m_testString;
         float m_testFloat = 0.0f;

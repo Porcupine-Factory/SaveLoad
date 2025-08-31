@@ -139,8 +139,15 @@ namespace SaveLoad
         }
 
         SaveData::SaveDataRequests::SaveDataBufferParams params;
-        params.dataBuffer.reset((void*)strBufferToSave.c_str());
-        params.dataBufferSize = strBufferToSave.length(); // TODO: this doesn't work with any arbitrary size, doesn't work well for long strings (e.g. 10+ characters)
+        const int length = strBufferToSave.length();
+        // Construct a character array / C string from the AZStd::string that was passed in
+        char tempCString[length];
+        for (int i = 0; i < length; i++)
+        {
+            tempCString[i] = strBufferToSave.c_str()[i];
+        }
+        params.dataBuffer.reset(tempCString);
+        params.dataBufferSize = length;
         params.dataBufferName = m_bufferSaveFilename;
         params.callback = [](const SaveData::SaveDataNotifications::DataBufferSavedParams& onSavedParams)
         {
@@ -156,24 +163,25 @@ namespace SaveLoad
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::SaveDataBuffer, params);
     }
 
-    void SaveLoadComponent::LoadBufferFromPersistentStorage()
+    AZStd::string SaveLoadComponent::LoadBufferFromPersistentStorage()
     {
         if (m_inEditor)
         {
             AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
-            return;
+            return m_loadedBuffer;
         }
 
         SaveData::SaveDataRequests::LoadDataBufferParams params;
         params.dataBufferName = m_bufferSaveFilename;
-        params.callback = [](const SaveData::SaveDataNotifications::DataBufferLoadedParams& onLoadedParams)
+        params.callback = [this](const SaveData::SaveDataNotifications::DataBufferLoadedParams& onLoadedParams)
         {
             if (onLoadedParams.result == SaveData::SaveDataNotifications::Result::Success)
             {
                 // SaveDataNotifications::DataBuffer is a shared_ptr, so you can choose to either preserve the
                 // buffer (by keeping a reference to it), or just let it go out of scope so it will be deleted.
-                            SaveDataNotifications::DataBuffer loadedDataBuffer = onLoadedParams.dataBuffer;
-                            SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedBuffer);
+                AZStd::string tempString((const char*)onLoadedParams.dataBuffer.get(), onLoadedParams.dataBufferSize);
+                m_loadedBuffer = tempString;
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedBuffer);
                 // Use the loaded data buffer...
             }
             else
@@ -182,6 +190,8 @@ namespace SaveLoad
             }
         };
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::LoadDataBuffer, params);
+
+        return m_loadedBuffer;
     }
 
     void SaveLoadComponent::SaveObjectToPersistentStorage()
