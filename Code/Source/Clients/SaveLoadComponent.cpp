@@ -144,8 +144,8 @@ namespace SaveLoad
 
         SaveData::SaveDataRequests::SaveDataBufferParams params;
         const int length = stringBufferToSave.length();
-        // Construct a character array / C string from the AZStd::string that was passed in
-        char tempCString[length];
+        // Allocate heap memory and construct a character array / C string from the AZStd::string that was passed in
+        char* tempCString = (char*) azmalloc(sizeof(char) * length);
         for (int i = 0; i < length; i++)
         {
             tempCString[i] = stringBufferToSave.c_str()[i];
@@ -153,7 +153,7 @@ namespace SaveLoad
         params.dataBuffer.reset(tempCString);
         params.dataBufferSize = length;
         params.dataBufferName = m_bufferSaveLoadFilename;
-        params.callback = [](const SaveData::SaveDataNotifications::DataBufferSavedParams& onSavedParams)
+        params.callback = [tempCString](const SaveData::SaveDataNotifications::DataBufferSavedParams& onSavedParams)
         {
             if (onSavedParams.result != SaveData::SaveDataNotifications::Result::Success)
             {
@@ -163,6 +163,9 @@ namespace SaveLoad
             {
                 SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnSavedBuffer);
             }
+
+            // Free up the memory that was used to save to persistent storage
+            azfree(tempCString);
         };
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::SaveDataBuffer, params);
     }
