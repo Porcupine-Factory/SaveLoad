@@ -28,12 +28,15 @@ namespace SaveLoad
         static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
 
         // SaveLoadComponentRequestBus
-        void SaveBufferToPersistentStorage(const AZStd::string& bufferSaveFilename, const AZStd::string& stringBufferToSave) override;
-        AZStd::string LoadBufferFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
-        void SaveObjectToPersistentStorage(const AZStd::string& objectSaveFilename) override;
-        void LoadObjectFromPersistentStorage(const AZStd::string& objectLoadFilename, const AzFramework::LocalUserId& localUserId) override;
-        AZStd::string GetBufferLastSaveLoadFilename() const override;
-        AZStd::string GetObjectLastSaveLoadFilename() const override;
+        void SaveStringToPersistentStorage(const AZStd::string& stringSaveFilename, const AZStd::string& stringToSave) override;
+        AZStd::string LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
+        void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string& thisSaveLoadComponentSaveFilename) override;
+        void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string& thisSaveLoadComponentLoadFilename, const AzFramework::LocalUserId& localUserId) override;
+        void SaveTransformComponentToPersistentStorage(const AZStd::string& transformComponentSaveFilename, const AZ::EntityId& entityIdToSaveTransform) override;
+        void LoadTransformComponentFromPersistentStorage(const AZStd::string& transformComponentLoadFilename, const AZ::EntityId& entityIdToLoadTransform, const AzFramework::LocalUserId& localUserId) override;
+        AZStd::string GetLastStringSaveLoadFilename() const override;
+        AZStd::string GetLastThisSaveLoadComponentSaveLoadFilename() const override;
+        AZStd::string GetLastTransformComponentSaveLoadFilename() const override;
         bool GetInEditor() const override;
         void SetInEditor(const bool& new_inEditor) override;
         bool GetTestBool() const override;
@@ -41,20 +44,20 @@ namespace SaveLoad
 
     private:
         // SaveLoadNotificationBus
-        void OnSavedBuffer();
-        void OnLoadedBuffer();
-        void OnSavedObject();
-        void OnLoadedObject();
+        void OnSavedStringFile();
+        void OnLoadedStringFile();
+        void OnSavedThisSaveLoadComponentFile();
+        void OnLoadedThisSaveLoadComponentFile();
+        void OnSavedTransformComponentFile();
+        void OnLoadedTransformComponentFile();
 
+        AZStd::string m_stringSaveLoadFilename = "StringSaveData";
+        AZStd::string m_thisSaveLoadComponentSaveLoadFilename = "SaveLoadComponentSaveData";
+        AZStd::string m_transformComponentSaveLoadFilename = "TransformComponentSaveData";
         bool m_inEditor = false;
-        AZStd::string m_bufferSaveLoadFilename = "BufferSaveData";
-        AZStd::string m_objectSaveLoadFilename = "ObjectSaveData";
 
-        AZStd::string m_loadedBuffer;
+        AZStd::string m_loadedString;
 
-        AZStd::string m_testString;
-        float m_testFloat = 0.0f;
-        int m_testInt = 0;
         bool m_testBool = false;
     };
 } // namespace SaveLoad

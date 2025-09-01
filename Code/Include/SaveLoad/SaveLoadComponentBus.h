@@ -12,14 +12,17 @@ namespace SaveLoad
     public:
         ~SaveLoadComponentRequests() override = default;
 
-        virtual void SaveBufferToPersistentStorage(const AZStd::string&, const AZStd::string&) = 0;
-        virtual AZStd::string LoadBufferFromPersistentStorage(const AZStd::string&) = 0;
-        virtual void SaveObjectToPersistentStorage(const AZStd::string&) = 0;
-        virtual void LoadObjectFromPersistentStorage(const AZStd::string&, const AzFramework::LocalUserId&) = 0;
+        virtual void SaveStringToPersistentStorage(const AZStd::string&, const AZStd::string&) = 0;
+        virtual AZStd::string LoadStringFromPersistentStorage(const AZStd::string&) = 0;
+        virtual void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string&) = 0;
+        virtual void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string&, const AzFramework::LocalUserId&) = 0;
+        virtual void SaveTransformComponentToPersistentStorage(const AZStd::string&, const AZ::EntityId&) = 0;
+        virtual void LoadTransformComponentFromPersistentStorage(const AZStd::string&, const AZ::EntityId&, const AzFramework::LocalUserId&) = 0;
+        virtual AZStd::string GetLastStringSaveLoadFilename() const = 0;
+        virtual AZStd::string GetLastThisSaveLoadComponentSaveLoadFilename() const = 0;
+        virtual AZStd::string GetLastTransformComponentSaveLoadFilename() const = 0;
         virtual bool GetInEditor() const = 0;
         virtual void SetInEditor(const bool&) = 0;
-        virtual AZStd::string GetBufferLastSaveLoadFilename() const = 0;
-        virtual AZStd::string GetObjectLastSaveLoadFilename() const = 0;
         virtual bool GetTestBool() const = 0;
         virtual void SetTestBool(const bool&) = 0;
     };
@@ -30,10 +33,12 @@ namespace SaveLoad
         : public AZ::ComponentBus
     {
     public:
-        virtual void OnSavedBuffer() = 0;
-        virtual void OnLoadedBuffer() = 0;
-        virtual void OnSavedObject() = 0;
-        virtual void OnLoadedObject() = 0;
+        virtual void OnSavedStringFile() = 0;
+        virtual void OnLoadedStringFile() = 0;
+        virtual void OnSavedThisSaveLoadComponentFile() = 0;
+        virtual void OnLoadedThisSaveLoadComponentFile() = 0;
+        virtual void OnSavedTransformComponentFile() = 0;
+        virtual void OnLoadedTransformComponentFile() = 0;
     };
 
     using SaveLoadNotificationBus = AZ::EBus<SaveLoadNotifications>;
@@ -45,23 +50,31 @@ namespace SaveLoad
     public:
         AZ_EBUS_BEHAVIOR_BINDER(SaveLoadNotificationHandler,
             SaveLoadNotificationHandlerTypeId,
-            AZ::SystemAllocator, OnSavedBuffer, OnLoadedBuffer, OnSavedObject, OnLoadedObject);
+            AZ::SystemAllocator, OnSavedStringFile, OnLoadedStringFile, OnSavedThisSaveLoadComponentFile, OnLoadedThisSaveLoadComponentFile, OnSavedTransformComponentFile, OnLoadedTransformComponentFile);
 
-        void OnSavedBuffer() override
+        void OnSavedStringFile() override
         {
-            Call(FN_OnSavedBuffer);
+            Call(FN_OnSavedStringFile);
         }
-        void OnLoadedBuffer() override
+        void OnLoadedStringFile() override
         {
-            Call(FN_OnLoadedBuffer);
+            Call(FN_OnLoadedStringFile);
         }
-        void OnSavedObject() override
+        void OnSavedThisSaveLoadComponentFile() override
         {
-            Call(FN_OnSavedObject);
+            Call(FN_OnSavedThisSaveLoadComponentFile);
         }
-        void OnLoadedObject() override
+        void OnLoadedThisSaveLoadComponentFile() override
         {
-            Call(FN_OnLoadedObject);
+            Call(FN_OnLoadedThisSaveLoadComponentFile);
+        }
+        void OnSavedTransformComponentFile() override
+        {
+            Call(FN_OnSavedTransformComponentFile);
+        }
+        void OnLoadedTransformComponentFile() override
+        {
+            Call(FN_OnLoadedTransformComponentFile);
         }
     };
 } // namespace SaveLoad
