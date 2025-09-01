@@ -59,10 +59,8 @@ namespace SaveLoad
                 ->Event("Load Buffer From Persistent Storage", &SaveLoadComponentRequests::LoadBufferFromPersistentStorage)
                 ->Event("Save Object To Persistent Storage", &SaveLoadComponentRequests::SaveObjectToPersistentStorage)
                 ->Event("Load Object From Persistent Storage", &SaveLoadComponentRequests::LoadObjectFromPersistentStorage)
-                ->Event("Get Buffer Save Filename", &SaveLoadComponentRequests::GetBufferSaveFilename)
-                ->Event("Set Buffer Save Filename", &SaveLoadComponentRequests::SetBufferSaveFilename)
-                ->Event("Get Object Save Filename", &SaveLoadComponentRequests::GetObjectSaveFilename)
-                ->Event("Set Object Save Filename", &SaveLoadComponentRequests::SetObjectSaveFilename)
+                ->Event("Get Buffer Last Save Load Filename", &SaveLoadComponentRequests::GetBufferLastSaveLoadFilename)
+                ->Event("Get Object Last Save Load Filename", &SaveLoadComponentRequests::GetObjectLastSaveLoadFilename)
                 ->Event("Get In Editor", &SaveLoadComponentRequests::GetInEditor)
                 ->Event("Set In Editor", &SaveLoadComponentRequests::SetInEditor)
                 ->Event("Get Test Bool", &SaveLoadComponentRequests::GetTestBool)
@@ -130,7 +128,7 @@ namespace SaveLoad
     void SaveLoadComponent::OnSavedObject(){}
     void SaveLoadComponent::OnLoadedObject(){}
 
-    void SaveLoadComponent::SaveBufferToPersistentStorage(const AZStd::string& strBufferToSave)
+    void SaveLoadComponent::SaveBufferToPersistentStorage(const AZStd::string& bufferSaveFilename, const AZStd::string& stringBufferToSave)
     {
         if (m_inEditor)
         {
@@ -138,17 +136,23 @@ namespace SaveLoad
             return;
         }
 
+        // Use the default or previous filename if one wasn't specified
+        if (!bufferSaveFilename.empty())
+        {
+            m_bufferSaveLoadFilename = bufferSaveFilename;
+        }
+
         SaveData::SaveDataRequests::SaveDataBufferParams params;
-        const int length = strBufferToSave.length();
+        const int length = stringBufferToSave.length();
         // Construct a character array / C string from the AZStd::string that was passed in
         char tempCString[length];
         for (int i = 0; i < length; i++)
         {
-            tempCString[i] = strBufferToSave.c_str()[i];
+            tempCString[i] = stringBufferToSave.c_str()[i];
         }
         params.dataBuffer.reset(tempCString);
         params.dataBufferSize = length;
-        params.dataBufferName = m_bufferSaveFilename;
+        params.dataBufferName = m_bufferSaveLoadFilename;
         params.callback = [](const SaveData::SaveDataNotifications::DataBufferSavedParams& onSavedParams)
         {
             if (onSavedParams.result != SaveData::SaveDataNotifications::Result::Success)
@@ -163,7 +167,7 @@ namespace SaveLoad
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::SaveDataBuffer, params);
     }
 
-    AZStd::string SaveLoadComponent::LoadBufferFromPersistentStorage()
+    AZStd::string SaveLoadComponent::LoadBufferFromPersistentStorage(const AZStd::string& bufferLoadFilename)
     {
         if (m_inEditor)
         {
@@ -171,8 +175,14 @@ namespace SaveLoad
             return m_loadedBuffer;
         }
 
+        // Use the default or previous filename if one wasn't specified
+        if (!bufferLoadFilename.empty())
+        {
+            m_bufferSaveLoadFilename = bufferLoadFilename;
+        }
+
         SaveData::SaveDataRequests::LoadDataBufferParams params;
-        params.dataBufferName = m_bufferSaveFilename;
+        params.dataBufferName = m_bufferSaveLoadFilename;
         params.callback = [this](const SaveData::SaveDataNotifications::DataBufferLoadedParams& onLoadedParams)
         {
             if (onLoadedParams.result == SaveData::SaveDataNotifications::Result::Success)
@@ -194,12 +204,18 @@ namespace SaveLoad
         return m_loadedBuffer;
     }
 
-    void SaveLoadComponent::SaveObjectToPersistentStorage()
+    void SaveLoadComponent::SaveObjectToPersistentStorage(const AZStd::string& objectSaveFilename)
     {
         if (m_inEditor)
         {
             AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
+        }
+
+        // Use the default or previous filename if one wasn't specified
+        if (!objectSaveFilename.empty())
+        {
+            m_objectSaveLoadFilename = objectSaveFilename;
         }
 
         // Reflect the Save Load Component class (if not already done).
@@ -213,7 +229,7 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
         params.serializableObject = saveLoadComponent;
         params.serializeContext = &serializeContext; // Omit to use the global AZ::SerializeContext instance
-        params.dataBufferName = m_objectSaveFilename;
+        params.dataBufferName = m_objectSaveLoadFilename;
         params.callback = [](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
@@ -229,12 +245,18 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveObject(params);
     }
 
-    void SaveLoadComponent::LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
+    void SaveLoadComponent::LoadObjectFromPersistentStorage(const AZStd::string& objectLoadFilename, const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
     {
         if (m_inEditor)
         {
             AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
             return;
+        }
+
+        // Use the default or previous filename if one wasn't specified
+        if (!objectLoadFilename.empty())
+        {
+            m_objectSaveLoadFilename = objectLoadFilename;
         }
 
         // Use *this instance of Save Load Component to load.
@@ -243,7 +265,7 @@ namespace SaveLoad
         // Setup the load data params
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent> params;
         params.serializableObject = saveLoadComponent;
-        params.dataBufferName = m_objectSaveFilename;
+        params.dataBufferName = m_objectSaveLoadFilename;
         params.callback = [this](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
@@ -272,24 +294,14 @@ namespace SaveLoad
         m_inEditor = new_inEditor;
     }
 
-    AZStd::string SaveLoadComponent::GetBufferSaveFilename() const
+    AZStd::string SaveLoadComponent::GetBufferLastSaveLoadFilename() const
     {
-        return m_bufferSaveFilename;
+        return m_bufferSaveLoadFilename;
     }
 
-    void SaveLoadComponent::SetBufferSaveFilename(const AZStd::string& new_bufferSaveFilename)
+    AZStd::string SaveLoadComponent::GetObjectLastSaveLoadFilename() const
     {
-        m_bufferSaveFilename = new_bufferSaveFilename;
-    }
-
-    AZStd::string SaveLoadComponent::GetObjectSaveFilename() const
-    {
-        return m_objectSaveFilename;
-    }
-
-    void SaveLoadComponent::SetObjectSaveFilename(const AZStd::string& new_objectSaveFilename)
-    {
-        m_objectSaveFilename = new_objectSaveFilename;
+        return m_objectSaveLoadFilename;
     }
 
     bool SaveLoadComponent::GetTestBool() const

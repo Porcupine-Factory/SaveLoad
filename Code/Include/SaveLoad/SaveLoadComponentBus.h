@@ -12,16 +12,14 @@ namespace SaveLoad
     public:
         ~SaveLoadComponentRequests() override = default;
 
-        virtual void SaveBufferToPersistentStorage(const AZStd::string&) = 0;
-        virtual AZStd::string LoadBufferFromPersistentStorage() = 0;
-        virtual void SaveObjectToPersistentStorage() = 0;
-        virtual void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId&) = 0;
+        virtual void SaveBufferToPersistentStorage(const AZStd::string&, const AZStd::string&) = 0;
+        virtual AZStd::string LoadBufferFromPersistentStorage(const AZStd::string&) = 0;
+        virtual void SaveObjectToPersistentStorage(const AZStd::string&) = 0;
+        virtual void LoadObjectFromPersistentStorage(const AZStd::string&, const AzFramework::LocalUserId&) = 0;
         virtual bool GetInEditor() const = 0;
         virtual void SetInEditor(const bool&) = 0;
-        virtual AZStd::string GetBufferSaveFilename() const = 0;
-        virtual void SetBufferSaveFilename(const AZStd::string&) = 0;
-        virtual AZStd::string GetObjectSaveFilename() const = 0;
-        virtual void SetObjectSaveFilename(const AZStd::string&) = 0;
+        virtual AZStd::string GetBufferLastSaveLoadFilename() const = 0;
+        virtual AZStd::string GetObjectLastSaveLoadFilename() const = 0;
         virtual bool GetTestBool() const = 0;
         virtual void SetTestBool(const bool&) = 0;
     };

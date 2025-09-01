@@ -28,14 +28,12 @@ namespace SaveLoad
         static void GetIncompatibleServices(AZ::ComponentDescriptor::DependencyArrayType& incompatible);
 
         // SaveLoadComponentRequestBus
-        void SaveBufferToPersistentStorage(const AZStd::string& strBufferToSave) override;
-        AZStd::string LoadBufferFromPersistentStorage() override;
-        void SaveObjectToPersistentStorage() override;
-        void LoadObjectFromPersistentStorage(const AzFramework::LocalUserId& localUserId) override;
-        AZStd::string GetBufferSaveFilename() const override;
-        void SetBufferSaveFilename(const AZStd::string& new_bufferSaveFilename) override;
-        AZStd::string GetObjectSaveFilename() const override;
-        void SetObjectSaveFilename(const AZStd::string& new_objectSaveFilename) override;
+        void SaveBufferToPersistentStorage(const AZStd::string& bufferSaveFilename, const AZStd::string& stringBufferToSave) override;
+        AZStd::string LoadBufferFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
+        void SaveObjectToPersistentStorage(const AZStd::string& objectSaveFilename) override;
+        void LoadObjectFromPersistentStorage(const AZStd::string& objectLoadFilename, const AzFramework::LocalUserId& localUserId) override;
+        AZStd::string GetBufferLastSaveLoadFilename() const override;
+        AZStd::string GetObjectLastSaveLoadFilename() const override;
         bool GetInEditor() const override;
         void SetInEditor(const bool& new_inEditor) override;
         bool GetTestBool() const override;
@@ -49,8 +47,8 @@ namespace SaveLoad
         void OnLoadedObject();
 
         bool m_inEditor = false;
-        AZStd::string m_bufferSaveFilename = "BufferSaveData";
-        AZStd::string m_objectSaveFilename = "ObjectSaveData";
+        AZStd::string m_bufferSaveLoadFilename = "BufferSaveData";
+        AZStd::string m_objectSaveLoadFilename = "ObjectSaveData";
 
         AZStd::string m_loadedBuffer;
 
