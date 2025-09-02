@@ -11,11 +11,11 @@ Since this gem uses the SaveData gem, it is not meant to be used in the O3DE edi
 
 So to use this gem, you must export your game as a distributable binary by running the `export.sh` or `export.bat` script within your project directory, and then running your game using either `<project-directory>/build/export/<project-name>GamePackage/<project-name>.GameLauncher` or `<project-directory>/build/launcher/bin/release/<project-name>.GameLauncher`.
 
-Whenever you perform a save of either buffer data or an object and its attributes, you will find the save files at the following locations in your filesystem:
+Whenever you perform a save of either plain-text string data or an object and its attributes, you will find the save files at the following locations in your filesystem:
 
 **Linux:**
 
-* `~/.local/share/<project-name>.GameLauncher/SaveData/<buffer-data-file-name>.savedata` (this is a plain text file)
+* `~/.local/share/<project-name>.GameLauncher/SaveData/<plain-text-data-file-name>.savedata` (this is a plain text file)
 * `~/.local/share/<project-name>.GameLauncher/SaveData/<object-file-name>.savedata` (this is a binary file)
 
 **Windows:**
