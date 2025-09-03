@@ -45,7 +45,7 @@ namespace SaveLoad
     private:
         // SaveLoadNotificationBus
         void OnSavedStringFile();
-        void OnLoadedStringFile(const AZStd::string& loadedString);
+        void OnLoadedStringFile(const AZStd::string& loadedStringFilename, const AZStd::string& loadedString);
         void OnSavedThisSaveLoadComponentFile();
         void OnLoadedThisSaveLoadComponentFile();
         void OnSavedTransformComponentFile();

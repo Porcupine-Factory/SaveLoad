@@ -113,7 +113,7 @@ namespace SaveLoad
 
     // Event Notification methods for use in scripts
     void SaveLoadComponent::OnSavedStringFile(){}
-    void SaveLoadComponent::OnLoadedStringFile(const AZStd::string& loadedString){}
+    void SaveLoadComponent::OnLoadedStringFile(const AZStd::string& loadedStringFilename, const AZStd::string& loadedString){}
     void SaveLoadComponent::OnSavedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnLoadedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnSavedTransformComponentFile(){}
@@ -185,7 +185,7 @@ namespace SaveLoad
                 // buffer (by keeping a reference to it), or just let it go out of scope so it will be deleted.
                 AZStd::string tempString((const char*)onLoadedParams.dataBuffer.get(), onLoadedParams.dataBufferSize);
                 m_loadedString = tempString;
-                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedStringFile, m_loadedString);
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedStringFile, onLoadedParams.dataBufferName, m_loadedString);
                 // Use the loaded data buffer...
             }
             else

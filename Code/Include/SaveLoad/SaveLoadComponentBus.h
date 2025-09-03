@@ -34,7 +34,7 @@ namespace SaveLoad
     {
     public:
         virtual void OnSavedStringFile() = 0;
-        virtual void OnLoadedStringFile(const AZStd::string&) = 0;
+        virtual void OnLoadedStringFile(const AZStd::string&, const  AZStd::string&) = 0;
         virtual void OnSavedThisSaveLoadComponentFile() = 0;
         virtual void OnLoadedThisSaveLoadComponentFile() = 0;
         virtual void OnSavedTransformComponentFile() = 0;
@@ -56,9 +56,9 @@ namespace SaveLoad
         {
             Call(FN_OnSavedStringFile);
         }
-        void OnLoadedStringFile(const AZStd::string& loadedString) override
+        void OnLoadedStringFile(const AZStd::string& loadedStringFilename, const AZStd::string& loadedString) override
         {
-            Call(FN_OnLoadedStringFile, loadedString);
+            Call(FN_OnLoadedStringFile, loadedStringFilename, loadedString);
         }
         void OnSavedThisSaveLoadComponentFile() override
         {
