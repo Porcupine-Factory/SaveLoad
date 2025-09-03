@@ -13,7 +13,7 @@ namespace SaveLoad
         ~SaveLoadComponentRequests() override = default;
 
         virtual void SaveStringToPersistentStorage(const AZStd::string&, const AZStd::string&) = 0;
-        virtual AZStd::string LoadStringFromPersistentStorage(const AZStd::string&) = 0;
+        virtual void LoadStringFromPersistentStorage(const AZStd::string&) = 0;
         virtual void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string&) = 0;
         virtual void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string&, const AzFramework::LocalUserId&) = 0;
         virtual void SaveTransformComponentToPersistentStorage(const AZStd::string&, const AZ::EntityId&) = 0;
@@ -34,7 +34,7 @@ namespace SaveLoad
     {
     public:
         virtual void OnSavedStringFile() = 0;
-        virtual void OnLoadedStringFile() = 0;
+        virtual void OnLoadedStringFile(const AZStd::string&) = 0;
         virtual void OnSavedThisSaveLoadComponentFile() = 0;
         virtual void OnLoadedThisSaveLoadComponentFile() = 0;
         virtual void OnSavedTransformComponentFile() = 0;
@@ -56,9 +56,9 @@ namespace SaveLoad
         {
             Call(FN_OnSavedStringFile);
         }
-        void OnLoadedStringFile() override
+        void OnLoadedStringFile(const AZStd::string& loadedString) override
         {
-            Call(FN_OnLoadedStringFile);
+            Call(FN_OnLoadedStringFile, loadedString);
         }
         void OnSavedThisSaveLoadComponentFile() override
         {

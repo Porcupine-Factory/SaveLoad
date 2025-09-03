@@ -29,7 +29,7 @@ namespace SaveLoad
 
         // SaveLoadComponentRequestBus
         void SaveStringToPersistentStorage(const AZStd::string& stringSaveFilename, const AZStd::string& stringToSave) override;
-        AZStd::string LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
+        void LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
         void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string& thisSaveLoadComponentSaveFilename) override;
         void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string& thisSaveLoadComponentLoadFilename, const AzFramework::LocalUserId& localUserId) override;
         void SaveTransformComponentToPersistentStorage(const AZStd::string& transformComponentSaveFilename, const AZ::EntityId& entityIdToSaveTransform) override;
@@ -45,7 +45,7 @@ namespace SaveLoad
     private:
         // SaveLoadNotificationBus
         void OnSavedStringFile();
-        void OnLoadedStringFile();
+        void OnLoadedStringFile(const AZStd::string& loadedString);
         void OnSavedThisSaveLoadComponentFile();
         void OnLoadedThisSaveLoadComponentFile();
         void OnSavedTransformComponentFile();

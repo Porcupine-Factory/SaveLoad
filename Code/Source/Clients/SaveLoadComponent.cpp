@@ -113,7 +113,7 @@ namespace SaveLoad
 
     // Event Notification methods for use in scripts
     void SaveLoadComponent::OnSavedStringFile(){}
-    void SaveLoadComponent::OnLoadedStringFile(){}
+    void SaveLoadComponent::OnLoadedStringFile(const AZStd::string& loadedString){}
     void SaveLoadComponent::OnSavedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnLoadedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnSavedTransformComponentFile(){}
@@ -161,12 +161,12 @@ namespace SaveLoad
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::SaveDataBuffer, params);
     }
 
-    AZStd::string SaveLoadComponent::LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename)
+    void SaveLoadComponent::LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename)
     {
         if (m_inEditor)
         {
             AZ_Warning("Save Load Component", false, "Editor environment detected, the Save Load component cannot be used in the editor, only with the *.GameLauncher.");
-            return m_loadedString;
+            return;
         }
 
         // Use the default or previous filename if one wasn't specified
@@ -185,7 +185,7 @@ namespace SaveLoad
                 // buffer (by keeping a reference to it), or just let it go out of scope so it will be deleted.
                 AZStd::string tempString((const char*)onLoadedParams.dataBuffer.get(), onLoadedParams.dataBufferSize);
                 m_loadedString = tempString;
-                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedStringFile);
+                SaveLoadNotificationBus::Broadcast(&SaveLoadNotificationBus::Events::OnLoadedStringFile, m_loadedString);
                 // Use the loaded data buffer...
             }
             else
@@ -194,8 +194,6 @@ namespace SaveLoad
             }
         };
         SaveData::SaveDataRequestBus::Broadcast(&SaveData::SaveDataRequests::LoadDataBuffer, params);
-
-        return m_loadedString;
     }
 
     void SaveLoadComponent::SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string& thisSaveLoadComponentSaveFilename)
