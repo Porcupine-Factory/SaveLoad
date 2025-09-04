@@ -97,7 +97,7 @@ namespace SaveLoad
         SaveLoadComponentRequestBus::Handler::BusDisconnect();
     }
 
-    void SaveLoadComponent::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
+    void SaveLoadComponent::GetRequiredServices([[maybe_unused]] AZ::ComponentDescriptor::DependencyArrayType& required)
     {
     }
 
@@ -113,7 +113,7 @@ namespace SaveLoad
 
     // Event Notification methods for use in scripts
     void SaveLoadComponent::OnSavedStringFile(){}
-    void SaveLoadComponent::OnLoadedStringFile(const AZStd::string& loadedStringFilename, const AZStd::string& loadedString){}
+    void SaveLoadComponent::OnLoadedStringFile([[maybe_unused]] const AZStd::string& loadedStringFilename, [[maybe_unused]] const AZStd::string& loadedString){}
     void SaveLoadComponent::OnSavedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnLoadedThisSaveLoadComponentFile(){}
     void SaveLoadComponent::OnSavedTransformComponentFile(){}
@@ -134,10 +134,10 @@ namespace SaveLoad
         }
 
         SaveData::SaveDataRequests::SaveDataBufferParams params;
-        const int length = stringToSave.length();
+        const size_t length = stringToSave.length();
         // Allocate heap memory and construct a character array / C string from the AZStd::string that was passed in
         char* tempCString = (char*) azmalloc(sizeof(char) * length);
-        for (int i = 0; i < length; i++)
+        for (size_t i = 0; i < length; i++)
         {
             tempCString[i] = stringToSave.c_str()[i];
         }
@@ -222,7 +222,7 @@ namespace SaveLoad
         params.serializableObject = saveLoadComponent;
         params.serializeContext = &serializeContext; // Omit to use the global AZ::SerializeContext instance
         params.dataBufferName = m_thisSaveLoadComponentSaveLoadFilename;
-        params.callback = [](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
+        params.callback = []([[maybe_unused]] const SaveData::SaveDataRequests::SaveOrLoadObjectParams<SaveLoadComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
             if (callbackResult != SaveData::SaveDataNotifications::Result::Success)
@@ -237,7 +237,7 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveObject(params);
     }
 
-    void SaveLoadComponent::LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string& thisSaveLoadComponentLoadFilename, const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
+    void SaveLoadComponent::LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string& thisSaveLoadComponentLoadFilename, [[maybe_unused]] const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
     {
         if (m_inEditor)
         {
@@ -308,7 +308,7 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveOrLoadObjectParams<AzFramework::TransformComponent> params;
         params.serializableObject = transformComponentSharedPtr;
         params.dataBufferName = m_transformComponentSaveLoadFilename;
-        params.callback = [](const SaveData::SaveDataRequests::SaveOrLoadObjectParams<AzFramework::TransformComponent>& callbackParams,
+        params.callback = []([[maybe_unused]] const SaveData::SaveDataRequests::SaveOrLoadObjectParams<AzFramework::TransformComponent>& callbackParams,
                              SaveData::SaveDataNotifications::Result callbackResult)
         {
             if (callbackResult != SaveData::SaveDataNotifications::Result::Success)
@@ -323,7 +323,7 @@ namespace SaveLoad
         SaveData::SaveDataRequests::SaveObject(params);
     }
 
-    void SaveLoadComponent::LoadTransformComponentFromPersistentStorage(const AZStd::string& transformComponentLoadFilename, const AZ::EntityId& entityIdToLoadTransformComponent, const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
+    void SaveLoadComponent::LoadTransformComponentFromPersistentStorage(const AZStd::string& transformComponentLoadFilename, const AZ::EntityId& entityIdToLoadTransformComponent, [[maybe_unused]] const AzFramework::LocalUserId& localUserId = AzFramework::LocalUserIdNone)
     {
         if (m_inEditor)
         {
