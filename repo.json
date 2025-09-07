@@ -1,0 +1,11 @@
+{
+  "repo_name": "SaveLoad",
+  "origin": "Porcupine Factory",
+  "repo_uri": "https://github.com/Porcupine-Factory/SaveLoad.git",
+  "summary": "The SaveLoad Gem provides a way to save and load data to persistent storage.",
+  "additional_info": "",
+  "last_updated": "2025-09-07",
+  "gems": [
+    "https://raw.githubusercontent.com/Porcupine-Factory/SaveLoad/main"
+  ]
+}
