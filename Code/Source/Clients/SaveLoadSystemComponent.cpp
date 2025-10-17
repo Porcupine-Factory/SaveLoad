@@ -7,16 +7,13 @@
 
 namespace SaveLoad
 {
-    AZ_COMPONENT_IMPL(SaveLoadSystemComponent, "SaveLoadSystemComponent",
-        SaveLoadSystemComponentTypeId);
+    AZ_COMPONENT_IMPL(SaveLoadSystemComponent, "SaveLoadSystemComponent", SaveLoadSystemComponentTypeId);
 
     void SaveLoadSystemComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<SaveLoadSystemComponent, AZ::Component>()
-                ->Version(0)
-                ;
+            serializeContext->Class<SaveLoadSystemComponent, AZ::Component>()->Version(0);
         }
     }
 

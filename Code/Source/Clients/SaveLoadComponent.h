@@ -1,9 +1,9 @@
 #pragma once
 #include <SaveLoad/SaveLoadComponentBus.h>
 
-#include <SaveLoad/SaveLoadTypeIds.h>
 #include <AzCore/Component/Component.h>
 #include <AzCore/Serialization/EditContext.h>
+#include <SaveLoad/SaveLoadTypeIds.h>
 
 namespace SaveLoad
 {
@@ -12,7 +12,7 @@ namespace SaveLoad
         , public SaveLoadComponentRequestBus::Handler
     {
     public:
-        //AZ_RTTI(SaveLoadComponent, SaveLoadComponentTypeId);
+        // AZ_RTTI(SaveLoadComponent, SaveLoadComponentTypeId);
         AZ_COMPONENT(SaveLoadComponent, SaveLoadComponentTypeId);
 
         // Provide runtime reflection
@@ -31,9 +31,14 @@ namespace SaveLoad
         void SaveStringToPersistentStorage(const AZStd::string& stringSaveFilename, const AZStd::string& stringToSave) override;
         void LoadStringFromPersistentStorage(const AZStd::string& bufferLoadFilename) override;
         void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string& thisSaveLoadComponentSaveFilename) override;
-        void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string& thisSaveLoadComponentLoadFilename, const AzFramework::LocalUserId& localUserId) override;
-        void SaveTransformComponentToPersistentStorage(const AZStd::string& transformComponentSaveFilename, const AZ::EntityId& entityIdToSaveTransform) override;
-        void LoadTransformComponentFromPersistentStorage(const AZStd::string& transformComponentLoadFilename, const AZ::EntityId& entityIdToLoadTransform, const AzFramework::LocalUserId& localUserId) override;
+        void LoadThisSaveLoadComponentFromPersistentStorage(
+            const AZStd::string& thisSaveLoadComponentLoadFilename, const AzFramework::LocalUserId& localUserId) override;
+        void SaveTransformComponentToPersistentStorage(
+            const AZStd::string& transformComponentSaveFilename, const AZ::EntityId& entityIdToSaveTransform) override;
+        void LoadTransformComponentFromPersistentStorage(
+            const AZStd::string& transformComponentLoadFilename,
+            const AZ::EntityId& entityIdToLoadTransform,
+            const AzFramework::LocalUserId& localUserId) override;
         AZStd::string GetLastStringSaveLoadFilename() const override;
         AZStd::string GetLastThisSaveLoadComponentSaveLoadFilename() const override;
         AZStd::string GetLastTransformComponentSaveLoadFilename() const override;

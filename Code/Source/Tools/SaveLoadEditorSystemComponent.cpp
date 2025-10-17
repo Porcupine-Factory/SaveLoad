@@ -1,20 +1,19 @@
 
-#include <AzCore/Serialization/SerializeContext.h>
 #include "SaveLoadEditorSystemComponent.h"
+#include <AzCore/Serialization/SerializeContext.h>
 
 #include <SaveLoad/SaveLoadTypeIds.h>
 
 namespace SaveLoad
 {
-    AZ_COMPONENT_IMPL(SaveLoadEditorSystemComponent, "SaveLoadEditorSystemComponent",
-        SaveLoadEditorSystemComponentTypeId, BaseSystemComponent);
+    AZ_COMPONENT_IMPL(
+        SaveLoadEditorSystemComponent, "SaveLoadEditorSystemComponent", SaveLoadEditorSystemComponentTypeId, BaseSystemComponent);
 
     void SaveLoadEditorSystemComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<SaveLoadEditorSystemComponent, SaveLoadSystemComponent>()
-                ->Version(0);
+            serializeContext->Class<SaveLoadEditorSystemComponent, SaveLoadSystemComponent>()->Version(0);
         }
     }
 

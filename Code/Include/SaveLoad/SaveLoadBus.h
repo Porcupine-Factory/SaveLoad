@@ -16,8 +16,7 @@ namespace SaveLoad
         // Put your public methods here
     };
 
-    class SaveLoadBusTraits
-        : public AZ::EBusTraits
+    class SaveLoadBusTraits : public AZ::EBusTraits
     {
     public:
         //////////////////////////////////////////////////////////////////////////

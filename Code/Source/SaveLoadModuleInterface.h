@@ -6,8 +6,7 @@
 
 namespace SaveLoad
 {
-    class SaveLoadModuleInterface
-        : public AZ::Module
+    class SaveLoadModuleInterface : public AZ::Module
     {
     public:
         AZ_TYPE_INFO_WITH_NAME_DECL(SaveLoadModuleInterface)
@@ -21,4 +20,4 @@ namespace SaveLoad
          */
         AZ::ComponentTypeList GetRequiredSystemComponents() const override;
     };
-}// namespace SaveLoad
+} // namespace SaveLoad

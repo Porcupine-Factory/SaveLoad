@@ -13,6 +13,7 @@ namespace SaveLoad
         , protected AzToolsFramework::EditorEvents::Bus::Handler
     {
         using BaseSystemComponent = SaveLoadSystemComponent;
+
     public:
         AZ_COMPONENT_DECL(SaveLoadEditorSystemComponent);
 

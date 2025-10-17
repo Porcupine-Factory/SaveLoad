@@ -1,9 +1,9 @@
 #pragma once
 
-#include <SaveLoad/SaveLoadTypeIds.h>
 #include <AzCore/Component/ComponentBus.h>
 #include <AzCore/RTTI/BehaviorContext.h>
 #include <SaveData/SaveDataRequestBus.h>
+#include <SaveLoad/SaveLoadTypeIds.h>
 
 namespace SaveLoad
 {
@@ -17,7 +17,8 @@ namespace SaveLoad
         virtual void SaveThisSaveLoadComponentToPersistentStorage(const AZStd::string&) = 0;
         virtual void LoadThisSaveLoadComponentFromPersistentStorage(const AZStd::string&, const AzFramework::LocalUserId&) = 0;
         virtual void SaveTransformComponentToPersistentStorage(const AZStd::string&, const AZ::EntityId&) = 0;
-        virtual void LoadTransformComponentFromPersistentStorage(const AZStd::string&, const AZ::EntityId&, const AzFramework::LocalUserId&) = 0;
+        virtual void LoadTransformComponentFromPersistentStorage(
+            const AZStd::string&, const AZ::EntityId&, const AzFramework::LocalUserId&) = 0;
         virtual AZStd::string GetLastStringSaveLoadFilename() const = 0;
         virtual AZStd::string GetLastThisSaveLoadComponentSaveLoadFilename() const = 0;
         virtual AZStd::string GetLastTransformComponentSaveLoadFilename() const = 0;
@@ -29,12 +30,11 @@ namespace SaveLoad
 
     using SaveLoadComponentRequestBus = AZ::EBus<SaveLoadComponentRequests>;
 
-    class SaveLoadNotifications
-        : public AZ::ComponentBus
+    class SaveLoadNotifications : public AZ::ComponentBus
     {
     public:
         virtual void OnSavedStringFile() = 0;
-        virtual void OnLoadedStringFile(const AZStd::string&, const  AZStd::string&) = 0;
+        virtual void OnLoadedStringFile(const AZStd::string&, const AZStd::string&) = 0;
         virtual void OnSavedThisSaveLoadComponentFile() = 0;
         virtual void OnLoadedThisSaveLoadComponentFile() = 0;
         virtual void OnSavedTransformComponentFile() = 0;
@@ -48,9 +48,16 @@ namespace SaveLoad
         , public AZ::BehaviorEBusHandler
     {
     public:
-        AZ_EBUS_BEHAVIOR_BINDER(SaveLoadNotificationHandler,
+        AZ_EBUS_BEHAVIOR_BINDER(
+            SaveLoadNotificationHandler,
             SaveLoadNotificationHandlerTypeId,
-            AZ::SystemAllocator, OnSavedStringFile, OnLoadedStringFile, OnSavedThisSaveLoadComponentFile, OnLoadedThisSaveLoadComponentFile, OnSavedTransformComponentFile, OnLoadedTransformComponentFile);
+            AZ::SystemAllocator,
+            OnSavedStringFile,
+            OnLoadedStringFile,
+            OnSavedThisSaveLoadComponentFile,
+            OnLoadedThisSaveLoadComponentFile,
+            OnSavedTransformComponentFile,
+            OnLoadedTransformComponentFile);
 
         void OnSavedStringFile() override
         {
